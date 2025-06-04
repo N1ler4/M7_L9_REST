@@ -14,9 +14,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-+5m*gcuq++f&unahkq22y_0e@q@j&^8vb$mp6&@n&)hwmrs^5j'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = ['nozim6690.com', 'localhost']
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "127.0.0.1").split(",")
 
 
 # Application definition
@@ -127,9 +127,6 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 10, 
     'DEFAULT_FILTER_BACKENDS': ['rest_framework.filters.SearchFilter'],
 }
-
-DEBUG = os.getenv('DEBUG', 'False') == 'True'
-
 
 
 
