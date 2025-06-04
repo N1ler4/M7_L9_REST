@@ -16,7 +16,7 @@ SECRET_KEY = 'django-insecure-+5m*gcuq++f&unahkq22y_0e@q@j&^8vb$mp6&@n&)hwmrs^5j
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['nozim6690.com', 'localhost']
 
 
 # Application definition
@@ -130,7 +130,7 @@ REST_FRAMEWORK = {
 
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = ['nozim6690.com', 'localhost']
+
 
 
 DATABASES = {
