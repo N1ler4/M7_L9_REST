@@ -1,8 +1,8 @@
 from django.urls import path
-from .views import WordViewSet
-from rest_framework.routers import DefaultRouter
+from . import views
 
-router = DefaultRouter()
-router.register(r'word', WordViewSet, basename='words')
-
-urlpatterns = router.urls
+urlpatterns = [
+    path('', views.word_list, name='word-list'),          
+    path('create/', views.word_create, name='word-create'), 
+    path('<int:pk>/', views.word_detail, name='word-detail'), 
+]

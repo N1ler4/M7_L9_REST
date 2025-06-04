@@ -1,25 +1,55 @@
-from django.shortcuts import render
 from django.db.models.functions import Lower
-from .serializers import WordSerializer
-from rest_framework import viewsets , filters
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from rest_framework import status
+from rest_framework.pagination import PageNumberPagination
 from .models import Word
+from .serializers import WordSerializer
 
 
-class WordViewSet(viewsets.ModelViewSet):
-    queryset = Word.objects.all()
-    serializer_class = WordSerializer
-    filter_backends = [filters.OrderingFilter, filters.SearchFilter]
-    ordering = ['name']
-    search_fields = ['name']
+@api_view(['GET'])
+def word_list(request):
+    words = Word.objects.all().order_by(Lower('name'))
 
-    def get_queryset(self):
-        queryset = self.queryset
-        name = self.request.query_params.get('name', None)
-        if name is not None:
-            queryset = queryset.filter(name__icontains=name)
-        return queryset
+    name = request.query_params.get('name')
+    if name:
+        words = words.filter(name__icontains=name)
+
+    paginator = PageNumberPagination()
+    paginator.page_size = 10
+    result_page = paginator.paginate_queryset(words, request)
+    serializer = WordSerializer(result_page, many=True)
+
+    return paginator.get_paginated_response(serializer.data)
 
 
-    def get_queryset(self):
-        return Word.objects.all().order_by(Lower('name'))
+@api_view(['GET', 'PUT', 'DELETE'])
+def word_detail(request, pk):
+    try:
+        word = Word.objects.get(pk=pk)
+    except Word.DoesNotExist:
+        return Response({'error': 'Word not found'}, status=status.HTTP_404_NOT_FOUND)
 
+    if request.method == 'GET':
+        serializer = WordSerializer(word)
+        return Response(serializer.data)
+
+    if request.method == 'PUT':
+        serializer = WordSerializer(word, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    if request.method == 'DELETE':
+        word.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+@api_view(['POST'])
+def word_create(request):
+    serializer = WordSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
